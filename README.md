@@ -1,96 +1,120 @@
 
 
-# PRD – WagerChess
+# PRD – Chex.fun
 
 ## Overview
 
-WagerChess is a browser-based chess platform designed for casual, real-time 1v1 games — with a long-term roadmap for crypto wagering. The platform will launch first as a **simple wallet-connected chess game**, and later evolve into a **wager-enabled dApp** on **Abstract (EVM-compatible L2)**.
+**Chex.fun** is a wallet-connected Web3 chess platform designed for casual players, crypto enthusiasts, and streamers. The product will evolve in two phases:
 
-The core idea:  
-> A visually polished, on-chain-native chess experience with future-ready mechanics for staked games.
+- **v1**: Clean, fun, and social chess gameplay with wallet identity and streamer support — no wagering
+- **v2**: Add crypto-based wagers with an on-chain escrow contract and a 2.5% platform fee
 
----
-
-## Design & Aesthetic
-
-- **Visual tone**: Light, fun, expressive — with a playful but clean Web3-native aesthetic.
-- **Inspiration**: [abs.xyz](https://abs.xyz) (clean, sharp UX) + [Pudgy Penguins](https://pudgypenguins.com) (friendly, fun, branded)
-- Design should feel Web3-native — with **simple UX**, **delightful micro-interactions**, and **soft visuals** that appeal to both degen and casual users.
+Chex.fun is built for launch on **Abstract**, an EVM-compatible Layer 2.
 
 ---
 
-## Version 1 – Wallet-Connected Chess Game (No Wagering)
+## Visual Identity & Tone
+
+- **Visual style**: Web3-native, fun, minimal — sleek UX and brand-friendly design
+- **Inspiration**: [abs.xyz](https://abs.xyz) and [Pudgy Penguins](https://pudgypenguins.com)
+- **Design goals**:
+  - Fast, elegant UI with instant feedback
+  - Streamable layout and branding-friendly match links
+  - Playful but polished identity
+
+---
+
+## Version 1 – Wallet Chess Platform (No Wagering)
 
 ### Objective
 
-Launch a clean and engaging 1v1 chess game with wallet connection, no tokens or crypto wagers yet.
+Deliver a delightful, low-friction chess experience designed to attract users and streamers. Focus is on identity, accessibility, and shareability.
 
 ### Core Features
 
-- **Connect Wallet**: Abstract-compatible (MetaMask, Rainbow, etc.)
-- **Play Chess**:
-  - 1v1 matchmaking (via link or simple lobby)
-  - Chess rules powered by `Chess.js`
-  - Visual board with `Chessboard.js`
-  - 5 or 10-minute timer per player
-- **Game Result**: win, lose, draw, timeout
-- **Identity**: Display player as ENS name or shortened wallet
-- **Frontend only**: No smart contract interaction yet
+| Feature | Description |
+|--------|-------------|
+| **Wallet Login** | Connect via MetaMask or Abstract-compatible wallet |
+| **ENS Display** | Show ENS names or short wallet address for identity |
+| **Chess Game** | Powered by `Chess.js` and `Chessboard.js`, standard rules |
+| **Time Control** | 5 and 10 minute match timers |
+| **Game Sharing** | Shareable match links to challenge viewers/friends |
+| **Spectator Mode** | Anyone with link can view live game |
+| **Custom Lobby Name** | Optional handle/tag (e.g. @streamer vs challenger) |
+| **Result Display** | Win / Lose / Draw / Timeout shown post-game |
+| **Streamer Mode** | Auto-show ENS or stream handle, low-clutter board view |
 
-### Tech Stack
-
-| Layer       | Tech                            |
-|-------------|---------------------------------|
-| Frontend    | Next.js, Tailwind CSS           |
-| Game Logic  | Chess.js, Chessboard.js         |
-| Wallet      | Wagmi + Ethers.js (or RainbowKit/Thirdweb) |
-| Hosting     | Vercel                          |
-| Chain       | Ethereum-compatible wallet (no txs in v1) |
+> Optional storage of match history via Firebase or Supabase
 
 ---
 
-## Version 2 – Wager-Based Chess on Abstract
+### Tech Stack
+
+| Layer       | Stack                          |
+|-------------|--------------------------------|
+| Frontend    | Next.js, Tailwind CSS          |
+| Game Logic  | Chess.js, Chessboard.js        |
+| Wallet      | Wagmi + Ethers.js or RainbowKit |
+| Hosting     | Vercel                         |
+| Chain       | Ethereum-compatible wallets (no txs in v1) |
+
+---
+
+## Version 2 – Crypto Wagering (On Abstract)
 
 ### Objective
 
-Add smart contract-based wagering: players can stake ETH or tokens on their game, and the winner claims the pot.
+Enable ETH/token wagering on games via on-chain escrow. Players stake into a smart contract, and the winner receives the pot minus a **2.5% platform fee** (configurable).
 
-### Wagering Features
+### Wager Features
 
-- Create or Join a game with a wager
-- Wager funds deposited into an **existing escrow contract**
-- Game ends → both players confirm result → escrow releases funds
-- Draw → refund
-- Optional timeout logic or admin override
+| Feature | Description |
+|--------|-------------|
+| **Wager Input** | Player sets wager in ETH/token |
+| **Escrow Deposit** | Both players must match stake to start |
+| **Escrow Contract** | Handles holding, payout, and draw logic |
+| **Result Declaration** | Manual confirmation or mutual result verification |
+| **Payouts** | Winner receives 97.5% of total pot, 2.5% to platform treasury |
+| **UI Additions** | Wager confirmation, wallet transaction flow, payout screen |
+
+> Contracts will be deployed on **Abstract L2**
 
 ### Smart Contract
 
-Use an existing escrow base (e.g. OpenZeppelin `PullPayment`, Thirdweb base contract, or minimal custom):
+Suggested minimal functions:
 
 ```solidity
-function createGame(uint256 wager) external payable;
+function createGame(uint256 wager, address token) external payable;
 function joinGame(uint256 gameId) external payable;
 function declareWinner(uint256 gameId, address winner) external;
 function withdraw(uint256 gameId) external;
 ```
 
-Contracts will be deployed to **Abstract**, using ETH or ERC-20 tokens.
+Built using OpenZeppelin or Thirdweb primitives.
 
-### v2 Additions
+---
 
-- Wager UI: Amount input, confirm modal, on-chain transaction steps
-- Result declaration logic (initially manual)
-- Contract interaction layer via Ethers.js or Thirdweb SDK
-- Game state indexed via local backend or lightweight subgraph (optional)
+## Anti-Cheating Solutions
+
+### Available Options for Integration
+
+| Tool | Description | Integration Level |
+|------|-------------|-------------------|
+| **Chess.com Fair Play API** | Used internally, not publicly available | ❌ |
+| **Lichess Open Source Detection** | Open-source analysis engine (`lichess-bot`, `lichess-db`) | ⚠️ Heavy, not plug-and-play |
+| **DeCeptive (by DeFi Safety)** | AI-based fraud detection (not chess-specific) | ⚠️ Experimental |
+| **Custom AI cheat detector (Lichess/Stockfish diff)** | Analyze move accuracy vs engine | ✅ Possible but intensive |
+
+> ✅ Suggestion for future: Build basic **move accuracy scoring** vs Stockfish and flag perfect play as potential cheat
 
 ---
 
 ## Long-Term Structure
 
-| Phase | Functionality                          |
-|-------|----------------------------------------|
-| v1    | Wallet chess game, no wagers           |
-| v2    | Escrow-based wagering & payouts        |
-| v3    | Leaderboards, ELO, tournaments         |
-| v4    | Anti-cheat, arbitration, oracle layers |
+| Phase | Features |
+|-------|----------|
+| **v1** | Wallet chess, shareable matches, streamer-focused UX |
+| **v2** | Escrowed wagers, smart contract payouts, platform fee |
+| **v3** | Match history, profiles, ladder system |
+| **v4** | Cheating detection, tournament mode, token incentives |
 
